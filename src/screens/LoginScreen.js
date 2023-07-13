@@ -7,8 +7,8 @@ import { app } from '../config/firebase';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 
 const LoginScreen = (props) => {
-  const [email, setEmail] = useState('rohailshafiq99@gmail.com');
-  const [password, setPassword] = useState('abcd1234A#');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
