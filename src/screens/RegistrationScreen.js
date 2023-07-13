@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { CheckBox } from 'react-native-elements';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { app } from '../config/firebase'; // Import the Firebase app instance
 
 const RegisterScreen = (props) => {
   const [accountType, setAccountType] = useState('patient');
+  const [isLoading, setIsLoading] = useState(false); // New state variable for loader
 
   // Patient fields
   const [patientFirstName, setPatientFirstName] = useState('');
@@ -40,9 +41,10 @@ const RegisterScreen = (props) => {
       setErrors(validationErrors);
       return;
     }
+    setIsLoading(true); // Show loader
 
     const auth = getAuth(app);
-    const db = getFirestore();
+    const db = getFirestore(app);
 
     try {
       let email, password;
@@ -57,7 +59,7 @@ const RegisterScreen = (props) => {
 
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      console.log('Registered!', user);
+      console.log('Registered!', user.uid);
       let userData;
 
       if (accountType === 'patient') {
@@ -69,7 +71,8 @@ const RegisterScreen = (props) => {
           email: patientEmail,
           cinc: patientCinc,
           maritalStatus: patientMaritalStatus,
-          accountType: accountType
+          accountType: accountType,
+          patientId: user.uid // Placeholder for the generated patient ID
         };
       } else if (accountType === 'doctor') {
         userData = {
@@ -80,28 +83,27 @@ const RegisterScreen = (props) => {
           city: doctorCity,
           address: doctorAddress,
           speciality: doctorSpeciality,
-          accountType: accountType
-
+          accountType: accountType,
+          doctorId: user.uid// Placeholder for the generated doctor ID
         };
       }
 
       // Store additional user data in Firestore
-      const docRef = await addDoc(collection(db, "users"), userData);
-      console.log("Additional data stored with ID: ", docRef.id);
+      const usersCollectionRef = collection(db, "users");
+      const docRef = await addDoc(usersCollectionRef, userData);
+      console.log('docRef', docRef)
 
       // Display successful registration alert
       Alert.alert('Success', 'Registration successful!', [
         { text: 'OK', onPress: () => props.navigation.navigate('Login') }
       ]);
-
-      // ...
+      setIsLoading(false); // Show loader
     } catch (error) {
+      setIsLoading(false); // Show loader
       // Registration failed
       Alert.alert('Error', error.message);
     }
   };
-
-
 
   const validateInputs = () => {
     const errors = {};
@@ -384,7 +386,11 @@ const RegisterScreen = (props) => {
       )}
 
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>SIGN UP</Text>
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#fff" /> // Show loader while isLoading is true
+        ) : (
+          <Text style={styles.buttonText}>SIGN UP</Text> // Show "SIGN UP" text when not loading
+        )}
       </TouchableOpacity>
     </ScrollView>
   );

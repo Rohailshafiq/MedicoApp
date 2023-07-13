@@ -7,14 +7,12 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
-
-
-
-const SearchScreen = () => {
+const SearchScreen = (props) => {
   const [searchText, setSearchText] = useState('');
   const [activeTab, setActiveTab] = useState('doctors');
   const [doctorList, setDoctorList] = useState([]);
   const [specialtyList, setSpecialtyList] = useState([]);
+
 
   useEffect(() => {
     fetchDoctors();
@@ -42,16 +40,27 @@ const SearchScreen = () => {
 
     try {
       const querySnapshot = await getDocs(q);
-      const specialties = [...new Set(querySnapshot.docs.map((doc) => doc.data().speciality))];
+      const specialties = [...new Set(querySnapshot.docs.map((doc) => doc.data()))];
       setSpecialtyList(specialties);
+      console.log('setSpecialtyList', specialtyList)
     } catch (error) {
       console.log('Error fetching specialties:', error);
     }
   };
 
   const handleSearch = () => {
-    // Perform search based on the searchText value
-    console.log('Search:', searchText);
+    if (activeTab === 'doctors') {
+      const filteredDoctors = doctorList.filter(
+        (doctor) =>
+          doctor.fullName.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setDoctorList(filteredDoctors);
+    } else if (activeTab === 'specialty') {
+      const filteredSpecialties = specialtyList.filter((specialty) =>
+        specialty.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setSpecialtyList(filteredSpecialties);
+    }
   };
 
   const handleTabChange = (tabName) => {
@@ -66,7 +75,16 @@ const SearchScreen = () => {
           style={styles.searchInput}
           placeholder="Search"
           value={searchText}
-          onChangeText={setSearchText}
+          onChangeText={(text) => {
+            setSearchText(text);
+            if (text.trim() === '') {
+              if (activeTab === 'doctors') {
+                fetchDoctors();
+              } else if (activeTab === 'specialty') {
+                fetchSpecialties();
+              }
+            }
+          }}
           onSubmitEditing={handleSearch}
           placeholderTextColor="lightgrey"
         />
@@ -93,11 +111,13 @@ const SearchScreen = () => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
               <View style={{ flexDirection: 'row' }}>
                 <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>A</Text>
+                  <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{doctor.fullName.charAt(0)}</Text>
                 </View>
                 <Text key={doctor.fullName} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{doctor.fullName}</Text>
               </View>
-              <AntDesign name='infocirlceo' size={24} style={{ paddingTop: 10 }} />
+              <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { doctor })}>
+                <AntDesign name='infocirlceo' size={24} style={{ paddingTop: 10 }} />
+              </TouchableOpacity>
             </View>
 
           ))}
@@ -110,11 +130,13 @@ const SearchScreen = () => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
               <View style={{ flexDirection: 'row' }}>
                 <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>A</Text>
+                  <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{specialty.speciality.charAt(0)}</Text>
                 </View>
-                <Text key={specialty} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{specialty}</Text>
+                <Text key={specialty} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{specialty.speciality}</Text>
               </View>
-              <Ionicons name='arrow-forward' size={28} style={{ paddingTop: 10 }} color='rgb(102, 186, 170)' />
+              <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { specialty })}>
+                <Ionicons name='arrow-forward' size={28} style={{ paddingTop: 10 }} color='rgb(102, 186, 170)' />
+              </TouchableOpacity>
             </View>
           ))}
         </View>

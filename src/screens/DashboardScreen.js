@@ -19,7 +19,7 @@ import { app } from '../config/firebase';
 const { width } = Dimensions.get('window');
 
 const Dashboard = ({ navigation, route }) => {
-  const { user } = route.params;
+  const { user } = route?.params;
   console.log('User:', user);
 
   const items = [
@@ -41,6 +41,7 @@ const Dashboard = ({ navigation, route }) => {
     {
       title: 'My DOCTORS',
       icon: <Fontisto name="doctor" size={40} color="white" />,
+      path: 'MyDoctors'
     },
     {
       title: 'PROFILE',

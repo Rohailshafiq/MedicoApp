@@ -10,6 +10,9 @@ import AppointmentScreen from '../screens/AppointmentScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import DoctorSearchScreen from '../screens/DoctorSearchScreen';
 import MedicalFolder from '../screens/MedicalFolder'
+import DoctorDetail from '../screens/DoctorDetail'
+import ConfirmAppointment from '../screens/ConfirmAppointment'
+import MyDoctors from '../screens/MyDoctors'
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +31,9 @@ const AppNavigator = () => {
         <Stack.Screen name="DoctorSearch" component={DoctorSearchScreen} options={{ headerTitle: '' }} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="MedicalFolder" component={MedicalFolder} />
+        <Stack.Screen name="DoctorDetail" component={DoctorDetail} />
+        <Stack.Screen name="ConfirmAppointment" component={ConfirmAppointment} />
+        <Stack.Screen name="MyDoctors" component={MyDoctors} />
 
       </Stack.Navigator>
     </NavigationContainer>
