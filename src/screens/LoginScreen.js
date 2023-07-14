@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, ActivityIndicator, Alert } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { CheckBox } from 'react-native-elements';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { app } from '../config/firebase';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 
@@ -13,6 +13,8 @@ const LoginScreen = (props) => {
   const [passwordError, setPasswordError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
 
   const handleLogin = async () => {
     const auth = getAuth(app);
@@ -78,6 +80,35 @@ const LoginScreen = (props) => {
     setRememberMe(!rememberMe);
   };
 
+  const handleForgotPassword = async () => {
+    // if (email.trim() === '') {
+    //   Alert.alert('Error', 'Please enter your email');
+    //   return;
+    // }
+
+    setIsModalVisible(true);
+  };
+
+  const handleResetPassword = async () => {
+    if (forgotPasswordEmail.trim() === '') {
+      Alert.alert('Error', 'Please enter your email');
+      return;
+    }
+    setIsLoading(true)
+    setForgotPasswordEmail('')
+    const auth = getAuth(app);
+
+    try {
+      await sendPasswordResetEmail(auth, forgotPasswordEmail);
+      Alert.alert('Email Sent', 'A password reset email has been sent to your email address.');
+    } catch (error) {
+      setIsLoading(false)
+      Alert.alert('Error', 'Failed to send password reset email. Please try again later.');
+    }
+    setIsLoading(false)
+    setIsModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -129,6 +160,36 @@ const LoginScreen = (props) => {
       >
         <Text style={styles.buttonText}>Create Account</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity onPress={handleForgotPassword}>
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+      </TouchableOpacity>
+
+      <Modal visible={isModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Forgot Password?</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter your email address"
+              value={forgotPasswordEmail}
+              onChangeText={setForgotPasswordEmail}
+            />
+
+            <TouchableOpacity style={styles.modalButton} onPress={handleResetPassword}>
+              {isLoading ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text style={styles.modalButtonText}>Reset Password</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.modalButton} onPress={() => setIsModalVisible(false)}>
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -140,7 +201,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
   title: {
     fontSize: 24,
@@ -164,7 +225,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
-    paddingTop: 10
+    paddingTop: 10,
   },
   icon: {
     marginRight: 10,
@@ -177,15 +238,14 @@ const styles = StyleSheet.create({
     color: 'red',
     marginBottom: 10,
     alignSelf: 'flex-start',
-    paddingLeft: 10
+    paddingLeft: 10,
   },
   button: {
     backgroundColor: 'rgb(102,186,170)',
     borderRadius: 22,
     paddingVertical: 15,
     marginBottom: 10,
-    width: '60%'
-
+    width: '60%',
   },
   buttonText: {
     color: '#fff',
@@ -198,7 +258,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
     alignSelf: 'flex-start',
-    paddingLeft: 10
+    paddingLeft: 10,
   },
   checkbox: {
     backgroundColor: 'transparent',
@@ -209,7 +269,49 @@ const styles = StyleSheet.create({
   checkboxText: {
     fontSize: 16,
     marginLeft: 8,
-    color: 'rgb(102,186,170)'
+    color: 'rgb(102,186,170)',
+  },
+  forgotPasswordText: {
+    fontSize: 16,
+    marginTop: 10,
+    borderBottomWidth: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%', // Adjust the width as needed
+    alignSelf: 'center', // Center the modal horizontally
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalInput: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgb(102,186,170)',
+    marginBottom: 10,
+    paddingVertical: 5,
+  },
+  modalButton: {
+    backgroundColor: 'rgb(102,186,170)',
+    borderRadius: 22,
+    paddingVertical: 15,
+    marginBottom: 10,
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

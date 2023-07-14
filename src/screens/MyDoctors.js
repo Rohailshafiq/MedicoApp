@@ -26,7 +26,7 @@ const MyDoctors = () => {
   }, []);
 
   const fetchAppointments = async () => {
-    setLoading(true); // Start the loading indicator
+    setLoading(true);
 
     const auth = getAuth(app);
     const currentUser = auth.currentUser;
@@ -34,18 +34,16 @@ const MyDoctors = () => {
 
     const db = getFirestore(app);
     const appointmentsRef = collection(db, 'appointments');
-    const q = query(
-      appointmentsRef,
-      where('userId', '==', userId)
-    );
+    const q = query(appointmentsRef, where('userId', '==', userId));
 
     try {
       const querySnapshot = await getDocs(q);
       const appointmentsData = querySnapshot.docs.map((doc) => doc.data());
 
-      const doctorIds = appointmentsData.map((appointment) => appointment.doctorId);
+      const uniqueDoctorIds = Array.from(new Set(appointmentsData.map((appointment) => appointment.doctorId)));
+
       const doctorsRef = collection(db, 'users');
-      const doctorsQuery = query(doctorsRef, where('doctorId', 'in', doctorIds));
+      const doctorsQuery = query(doctorsRef, where('doctorId', 'in', uniqueDoctorIds));
       const doctorsSnapshot = await getDocs(doctorsQuery);
 
       const doctorsData = doctorsSnapshot.docs.reduce((acc, doc) => {
@@ -54,19 +52,24 @@ const MyDoctors = () => {
         return acc;
       }, {});
 
-      const appointmentsWithDoctor = appointmentsData.map((appointment) => ({
-        ...appointment,
-        doctor: doctorsData[appointment.doctorId],
-      }));
+      const appointmentsWithDoctors = uniqueDoctorIds.map((doctorId) => {
+        const appointment = appointmentsData.find((appointment) => appointment.doctorId === doctorId);
+        return {
+          ...appointment,
+          doctor: doctorsData[doctorId],
+        };
+      });
 
-      setAppointments(appointmentsWithDoctor);
-      console.log('Appointments data:', appointmentsWithDoctor); // Log the retrieved data
+      setAppointments(appointmentsWithDoctors);
+      console.log('Appointments data:', appointmentsWithDoctors);
     } catch (error) {
       console.log('Error fetching appointments:', error);
     } finally {
-      setLoading(false); // Stop the loading indicator
+      setLoading(false);
     }
   };
+
+
 
   const renderItem = ({ item }) => {
     return (

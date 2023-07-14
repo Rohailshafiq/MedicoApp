@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { app } from '../config/firebase';
@@ -12,7 +12,7 @@ const SearchScreen = (props) => {
   const [activeTab, setActiveTab] = useState('doctors');
   const [doctorList, setDoctorList] = useState([]);
   const [specialtyList, setSpecialtyList] = useState([]);
-
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchDoctors();
@@ -20,6 +20,7 @@ const SearchScreen = (props) => {
   }, []);
 
   const fetchDoctors = async () => {
+    setLoading(true)
     const db = getFirestore(app);
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('accountType', '==', 'doctor'));
@@ -27,13 +28,16 @@ const SearchScreen = (props) => {
     try {
       const querySnapshot = await getDocs(q);
       const doctors = querySnapshot.docs.map((doc) => doc.data());
+      setLoading(false)
       setDoctorList(doctors);
     } catch (error) {
+      setLoading(false)
       console.log('Error fetching doctors:', error);
     }
   };
 
   const fetchSpecialties = async () => {
+    setLoading(true)
     const db = getFirestore(app);
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('accountType', '==', 'doctor'));
@@ -41,9 +45,10 @@ const SearchScreen = (props) => {
     try {
       const querySnapshot = await getDocs(q);
       const specialties = [...new Set(querySnapshot.docs.map((doc) => doc.data()))];
+      setLoading(false)
       setSpecialtyList(specialties);
-      console.log('setSpecialtyList', specialtyList)
     } catch (error) {
+      setLoading(false)
       console.log('Error fetching specialties:', error);
     }
   };
@@ -105,41 +110,49 @@ const SearchScreen = (props) => {
         </TouchableOpacity>
       </View>
 
-      {activeTab === 'doctors' && (
-        <View style={styles.tabContent}>
-          {doctorList.map((doctor) => (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
-              <View style={{ flexDirection: 'row' }}>
-                <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{doctor.fullName.charAt(0)}</Text>
-                </View>
-                <Text key={doctor.fullName} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{doctor.fullName}</Text>
-              </View>
-              <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { doctor })}>
-                <AntDesign name='infocirlceo' size={24} style={{ paddingTop: 10 }} />
-              </TouchableOpacity>
-            </View>
-
-          ))}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="rgb(102, 186, 170)" />
         </View>
-      )}
-
-      {activeTab === 'specialty' && (
-        <View style={styles.tabContent}>
-          {specialtyList.map((specialty) => (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
-              <View style={{ flexDirection: 'row' }}>
-                <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{specialty.speciality.charAt(0)}</Text>
+      ) : (
+        <>
+          {activeTab === 'doctors' && (
+            <View style={styles.tabContent}>
+              {doctorList.map((doctor) => (
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
+                  <View style={{ flexDirection: 'row' }}>
+                    <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{doctor.fullName.charAt(0)}</Text>
+                    </View>
+                    <Text key={doctor.fullName} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{doctor.fullName}</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { doctor })}>
+                    <AntDesign name='infocirlceo' size={24} style={{ paddingTop: 10 }} />
+                  </TouchableOpacity>
                 </View>
-                <Text key={specialty} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{specialty.speciality}</Text>
-              </View>
-              <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { specialty })}>
-                <Ionicons name='arrow-forward' size={28} style={{ paddingTop: 10 }} color='rgb(102, 186, 170)' />
-              </TouchableOpacity>
+
+              ))}
             </View>
-          ))}
-        </View>
+          )}
+
+          {activeTab === 'specialty' && (
+            <View style={styles.tabContent}>
+              {specialtyList.map((specialty) => (
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
+                  <View style={{ flexDirection: 'row' }}>
+                    <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{specialty.speciality.charAt(0)}</Text>
+                    </View>
+                    <Text key={specialty} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{specialty.speciality}</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { specialty })}>
+                    <Ionicons name='arrow-forward' size={28} style={{ paddingTop: 10 }} color='rgb(102, 186, 170)' />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+        </>
       )}
     </View>
   );
@@ -149,7 +162,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'rgb(102, 186, 170)',
-    //paddingHorizontal: 20,
   },
   searchBarContainer: {
     flexDirection: 'row',
@@ -168,6 +180,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
     borderColor: 'white',
+
   },
   searchIcon: {
     left: 15,
@@ -184,8 +197,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 10,
-    //borderBottomWidth: 1,
-    //borderBottomColor: '#fff',
   },
   activeTab: {
     borderBottomColor: '#fff',
@@ -197,13 +208,16 @@ const styles = StyleSheet.create({
   },
   tabContent: {
     flex: 1,
-    //justifyContent: 'center',
-    //alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 5,
     padding: 10,
     borderBottomWidth: 2,
-
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white'
   },
 });
 

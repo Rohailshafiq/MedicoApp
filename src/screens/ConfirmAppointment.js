@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, setDoc, doc, up } from 'firebase/firestore';
 import { app } from '../config/firebase';
 import { getAuth, currentUser } from 'firebase/auth';
 
@@ -20,15 +20,12 @@ const BookAppointmentScreen = ({ route }) => {
   const { doctorId } = route.params;
 
   const handleAppointmentBooking = async () => {
-    // ...
-
     try {
       setIsLoading(true);
 
       const auth = getAuth(app);
       const user = auth.currentUser;
 
-      console.log('currentUser', user)
       const appointmentData = {
         name,
         phoneNumber,
@@ -36,22 +33,26 @@ const BookAppointmentScreen = ({ route }) => {
         date: selectedDate,
         time: selectedTime,
         status: 'on Hold',
-        userId: user.uid, // Associate the appointment with the user ID
-        doctorId: doctorId
+        userId: user.uid,
+        doctorId: doctorId,
       };
 
       const db = getFirestore(app);
-      await addDoc(collection(db, 'appointments'), appointmentData);
-      // ...
-      Alert.alert('Success', 'Appointment booked successfully!', [
-        { text: 'OK' }
-      ]);
+      const docRef = await addDoc(collection(db, 'appointments'), appointmentData);
+      const appointmentId = docRef.id;
+
+      // Update the appointment with the appointmentId
+      const updatedAppointmentData = { ...appointmentData, appointmentId };
+      await setDoc(doc(db, 'appointments', appointmentId), updatedAppointmentData);
+
+      Alert.alert('Success', 'Appointment booked successfully!', [{ text: 'OK' }]);
     } catch (error) {
       console.log('Error storing appointment data:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const handleDateConfirm = (date) => {
     setSelectedDate(date);
