@@ -7,22 +7,45 @@ import {
   StatusBar,
   Dimensions,
   ScrollView,
+  AppState,
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Fontisto from 'react-native-vector-icons/Fontisto';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
-import { app } from '../config/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppState } from '../Context/AppContext';
 
 const { width } = Dimensions.get('window');
 
 const Dashboard = ({ navigation, route }) => {
-  const { user } = route?.params;
-  console.log('User:', user);
+  const state = useAppState()
 
-  const items = [
+  const [user, setUser] = React.useState('');
+  console.warn('user', user);
+  const getUser = async () => {
+    try {
+      const currentUser = await AsyncStorage.getItem('currentUser');
+      const parsedUser = JSON.parse(currentUser);
+      setUser(parsedUser);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+  console.warn('user is', user);
+  useEffect(() => {
+    getUser();
+  }, []);
+  const handleOnItemClick = async (item) => {
+    console.warn('item.path', item.path)
+    if (item.title === 'LOG OUT') {
+      await AsyncStorage.removeItem('currentUser');
+      state.dispatch('SIGN_OUT')
+      navigation.navigate(item.path);
+    } else {
+      navigation.navigate(item.path, { currentUser: user });
+    }
+  }; items = [
     {
       title: 'APPOINTMENT',
       icon: <Icon name="calendar-today" size={40} color="white" />,
@@ -31,17 +54,17 @@ const Dashboard = ({ navigation, route }) => {
     {
       title: 'MEDICAL FOLDER',
       icon: <Icon name="create-new-folder" size={40} color="white" />,
-      path: 'MedicalFolder'
+      path: 'MedicalFolder',
     },
     {
       title: 'Search',
       icon: <Icon name="search" size={40} color="white" />,
-      path: 'DoctorSearch',
+      path: user?.accountType == 'doctor' ? 'PatientList' : 'DoctorSearch',
     },
     {
-      title: 'My DOCTORS',
-      icon: <Fontisto name="doctor" size={40} color="white" />,
-      path: 'MyDoctors'
+      title: user?.accountType === 'doctor' ? 'MY PATIENT' : 'My DOCTORS',
+      icon: <Fontisto name={user?.accountType == "doctor" ? 'bed-patient' : 'doctor'} size={40} color="white" />,
+      path: user?.accountType == 'doctor' ? 'MyPatient' : 'MyDoctors',
     },
     {
       title: 'PROFILE',
@@ -51,15 +74,15 @@ const Dashboard = ({ navigation, route }) => {
     {
       title: 'LOG OUT',
       icon: <Icon name="logout" size={40} color="white" />,
+      path: 'Login',
     },
   ];
 
   const renderMenuItem = (item, index) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate(item.path)}
+      onPress={() => handleOnItemClick(item)}
       style={styles.square}
-      key={index}
-    >
+      key={index}>
       {item.icon}
       <Text style={{ color: 'white', fontSize: width * 0.05, fontWeight: '700' }}>
         {item.title}
@@ -71,7 +94,7 @@ const Dashboard = ({ navigation, route }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar />
       <View style={styles.topdiv}>
-        <View>
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
           {user && (
             <>
               {user.fullName ? (
@@ -80,10 +103,15 @@ const Dashboard = ({ navigation, route }) => {
                 </Text>
               ) : (
                 <>
-                  <Text style={{ color: 'white', fontSize: width * 0.06 }}>
+                  <Text
+                    style={{
+                      fontWeight: '700',
+                      color: 'white',
+                      fontSize: width * 0.06,
+                      marginLeft: 30,
+                    }}>
                     {user.firstName} {user.lastName}
                   </Text>
-
                 </>
               )}
               {user.code ? (
@@ -91,7 +119,12 @@ const Dashboard = ({ navigation, route }) => {
                   {user.code}
                 </Text>
               ) : (
-                <Text style={{ color: 'white', fontSize: width * 0.06 }}>
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: width * 0.06,
+                    marginLeft: 30,
+                  }}>
                   {user.cinc}
                 </Text>
               )}
@@ -104,7 +137,6 @@ const Dashboard = ({ navigation, route }) => {
       </ScrollView>
     </SafeAreaView>
   );
-
 };
 
 const styles = StyleSheet.create({

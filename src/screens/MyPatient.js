@@ -26,34 +26,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
-const Appointments = () => {
-  const menuItem = ['on Hold', 'Accepted', 'Declined'];
+// create a component
+const MyPatient = (props) => {
   const [selectedTab, setSelectedTab] = useState("on Hold");
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const [user, setUser] = React.useState('');
-  const getUsers = async () => {
-    try {
-      const cUser = await AsyncStorage.getItem('currentUser');
-      let parseUser = JSON.parse(cUser);
-      setUser(parseUser);
-    } catch (error) {
-      console.log('error', error);
-    }
-  };
-  useEffect(() => {
-    getUsers();
-  }, []);
-
-  useEffect(() => {
-    fetchAppointments(); // Fetch appointments when component mounts
-  }, []);
 
   useEffect(() => {
     fetchAppointments(); // Fetch appointments whenever selectedTab changes
-  }, [selectedTab]);
-
+  }, []);
 
   const fetchAppointments = async () => {
     setLoading(true); // Start the loading indicator
@@ -69,13 +51,11 @@ const Appointments = () => {
     const userId = currentUser.uid;
     const db = getFirestore(app);
     const appointmentsRef = collection(db, 'appointments');
-    let q = query(appointmentsRef, where('status', '==', selectedTab));
-
-    if (user.accountType === 'doctor') {
-      q = query(q, where('doctorId', '==', userId));
-    } else {
-      q = query(q, where('userId', '==', userId));
-    }
+    const q = query(
+      appointmentsRef,
+      where('status', '==', "Accepted"),
+      where('doctorId', '==', userId)
+    );
 
     try {
       const querySnapshot = await getDocs(q);
@@ -89,23 +69,6 @@ const Appointments = () => {
     }
   };
 
-
-  const updateAppointmentStatus = async (appointmentId, newStatus) => {
-    console.log('appointmentId, newStatus', appointmentId, newStatus);
-    try {
-      const db = getFirestore(app);
-      const appointmentRef = doc(db, 'appointments', appointmentId);
-
-      await updateDoc(appointmentRef, {
-        status: newStatus,
-      });
-
-      Alert.alert('Appointment status updated successfully!');
-    } catch (error) {
-      console.log('Error updating appointment status:', error);
-    }
-  };
-
   const renderItem = ({ item }) => {
     const appointmentDate = item.date.toDate();
     const formattedDate = appointmentDate.toLocaleDateString();
@@ -113,12 +76,7 @@ const Appointments = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
-    console.log('what is item', item.appointmentId);
-    const handlePayment = () => {
-      // Navigate to the payment screen
-      // Implement your navigation logic here
-      // Example: navigation.navigate('PaymentScreen', { appointment: item });
-    };
+    console.log('what is item', item);
 
     return (
       <View style={styles.itemContainer}>
@@ -130,32 +88,13 @@ const Appointments = () => {
           <Text style={styles.itemTime}>Time: {formattedTime}</Text>
           <Text style={styles.itemPhone}>Phone: {item.phoneNumber}</Text>
           <Text style={styles.itemReason}>Reason: {item.reason}</Text>
-          {item.status === 'Accepted' && user.accountType != 'doctor' && (
-            <TouchableOpacity
-              style={styles.paymentButton}
-              onPress={handlePayment}>
-              <Text style={styles.paymentButtonText}>Payment</Text>
-            </TouchableOpacity>
-          )}
-          {user.accountType == 'doctor' && item.status === 'on Hold' ? (
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                onPress={() =>
-                  updateAppointmentStatus(item.appointmentId, 'Accepted')
-                }
-                style={styles.acceptedBtn}>
-                <Text style={styles.buttonText}>Accepted</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() =>
-                  updateAppointmentStatus(item.appointmentId, 'Declined')
-                }
-                style={styles.declineBtn}>
-                <Text style={styles.buttonText}>Declined</Text>
-              </TouchableOpacity>
-            </View>
-          ) : null}
         </View>
+        <TouchableOpacity onPress={() => props.navigation.navigate('AddPrescription', { prescriptionId: item.doctorId, userName: item.name, userId: item.userId })}>
+          <View style={{ alignItems: 'center', justifyContent: 'center', height: 50, marginTop: 20, backgroundColor: 'rgb(103,186,170)' }}>
+            <Text style={{ textAlign: "center", color: 'white', fontSize: 18 }}>Add Prescription</Text>
+          </View>
+        </TouchableOpacity>
+
       </View>
     );
   };
@@ -163,26 +102,6 @@ const Appointments = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar />
-      <View style={styles.topdiv}>
-        <View style={styles.menuBox}>
-          <Text style={styles.title}>Appointments</Text>
-          <View style={styles.menuContainer}>
-            {menuItem.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => setSelectedTab(item)}>
-                <Text
-                  style={[
-                    styles.menuItemText,
-                    selectedTab === item && styles.selectedMenuItem,
-                  ]}>
-                  {item.toUpperCase()}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </View>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="rgb(102, 186, 170)" />
@@ -229,28 +148,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
   },
-  menuItem: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    alignSelf: 'flex-end',
-  },
-  selectedMenuItem: {
-    alignItems: 'center',
-    fontWeight: '900',
-  },
-  menuBox: {
-    width: '100%',
-  },
-  menuItemText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-    paddingTop: 10,
-    textTransform: 'capitalize',
-  },
   listContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     paddingVertical: 10,
   },
   itemContainer: {
@@ -347,4 +246,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Appointments;
+export default MyPatient

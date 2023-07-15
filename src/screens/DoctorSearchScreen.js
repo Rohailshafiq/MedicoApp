@@ -100,13 +100,13 @@ const SearchScreen = (props) => {
           style={[styles.tab, activeTab === 'doctors' && styles.activeTab]}
           onPress={() => handleTabChange('doctors')}
         >
-          <Text style={styles.tabText}>Doctors</Text>
+          <Text style={[styles.tabText, activeTab === 'doctors' ? styles.activeTabText : null]}>Doctors</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'specialty' && styles.activeTab]}
           onPress={() => handleTabChange('specialty')}
         >
-          <Text style={styles.tabText}>Specialty</Text>
+          <Text style={[styles.tabText, activeTab === 'specialty' ? styles.activeTabText : null]}>Specialty</Text>
         </TouchableOpacity>
       </View>
 
@@ -119,36 +119,43 @@ const SearchScreen = (props) => {
           {activeTab === 'doctors' && (
             <View style={styles.tabContent}>
               {doctorList.map((doctor) => (
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
-                  <View style={{ flexDirection: 'row' }}>
-                    <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{doctor.fullName.charAt(0)}</Text>
-                    </View>
-                    <Text key={doctor.fullName} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{doctor.fullName}</Text>
-                  </View>
-                  <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { doctor })}>
-                    <AntDesign name='infocirlceo' size={24} style={{ paddingTop: 10 }} />
-                  </TouchableOpacity>
-                </View>
+                <>
 
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
+                    <View style={{ flexDirection: 'row' }}>
+                      <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{doctor.fullName.charAt(0)}</Text>
+                      </View>
+                      <Text key={doctor.fullName} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{doctor.fullName}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { doctor })}>
+                      <AntDesign name='infocirlceo' size={24} style={{ paddingTop: 10 }} />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{ borderBottomWidth: 1, borderBottomColor: 'lightgray' }} />
+                </>
               ))}
+
             </View>
           )}
 
           {activeTab === 'specialty' && (
             <View style={styles.tabContent}>
               {specialtyList.map((specialty) => (
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
-                  <View style={{ flexDirection: 'row' }}>
-                    <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{specialty.speciality.charAt(0)}</Text>
+                <>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6 }}>
+                    <View style={{ flexDirection: 'row' }}>
+                      <View style={{ width: 60, height: 60, borderRadius: 34, borderColor: 'rgb(102, 186, 170)', backgroundColor: 'white', borderWidth: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ textAlign: 'center', fontSize: 24, color: 'rgb(102, 186, 170)' }}>{specialty.speciality.charAt(0)}</Text>
+                      </View>
+                      <Text key={specialty} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{specialty.speciality}</Text>
                     </View>
-                    <Text key={specialty} style={{ textAlign: 'center', paddingTop: 20, paddingLeft: 15, fontSize: 20, }}>{specialty.speciality}</Text>
+                    <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { specialty })}>
+                      <Ionicons name='arrow-forward' size={28} style={{ paddingTop: 10 }} color='rgb(102, 186, 170)' />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity onPress={() => props.navigation.navigate('DoctorDetail', { specialty })}>
-                    <Ionicons name='arrow-forward' size={28} style={{ paddingTop: 10 }} color='rgb(102, 186, 170)' />
-                  </TouchableOpacity>
-                </View>
+                  <View style={{ borderBottomWidth: 1, borderBottomColor: 'lightgray' }} />
+                </>
               ))}
             </View>
           )}
@@ -185,6 +192,12 @@ const styles = StyleSheet.create({
   searchIcon: {
     left: 15,
     color: 'grey',
+  },
+  activeTab: {
+    borderBottomColor: '#fff',
+  },
+  activeTabText: {
+    fontWeight: 'bold',
   },
   tabContainer: {
     flexDirection: 'row',

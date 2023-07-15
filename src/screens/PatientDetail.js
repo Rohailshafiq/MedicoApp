@@ -14,19 +14,17 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const { width } = Dimensions.get('window');
 
-const Profile = ({ route }) => {
-  const menuItem = ['On Hold', 'Accepted', 'Declined'];
-  const [selectedTab, setSelectedTab] = React.useState('On Hold');
-  const { currentUser } = route.params;
+const PatientDetail = ({ route }) => {
+  const { item } = route.params;
+  console.log('itemitem', item)
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar />
-      {/* <View style={styles.editBox}>
+      <View style={styles.editBox}>
         <TouchableOpacity>
-          <Icon name="edit" size={30} color="black" />
         </TouchableOpacity>
-      </View> */}
+      </View>
       <View style={styles.mainView}>
         <Image
           source={{
@@ -34,8 +32,7 @@ const Profile = ({ route }) => {
           }}
           style={styles.avatar}
         />
-        <Text style={styles.title}>{currentUser.fullName ? currentUser.fullName : currentUser.firstName + currentUser.lastName}</Text>
-        <Text style={styles.spec}>{currentUser.speciality ? currentUser.speciality : currentUser.cinc}</Text>
+        <Text style={styles.title}>{item.name}</Text>
         <View
           style={{
             width: '100%',
@@ -46,7 +43,7 @@ const Profile = ({ route }) => {
           <Icon name="email" size={30} color="black" />
 
           <Text style={{ color: 'gray', paddingLeft: 5, fontSize: width * 0.05 }}>
-            {currentUser.email}
+            {item.doctor.email}
           </Text>
         </View>
         <View
@@ -59,11 +56,11 @@ const Profile = ({ route }) => {
           <Icon name="phone" size={30} color="black" />
 
           <Text style={{ color: 'gray', paddingLeft: 5, fontSize: width * 0.05 }}>
-            {currentUser.phoneNumber}{' '}
+            {item.phoneNumber}{' '}
           </Text>
         </View>
         {
-          currentUser.address ? <View
+          item.doctor.address ? <View
             style={{
               width: '100%',
               paddingLeft: 20,
@@ -73,28 +70,10 @@ const Profile = ({ route }) => {
             <Icon name="location-on" size={30} color="black" />
 
             <Text style={{ color: 'gray', paddingLeft: 5, fontSize: width * 0.05 }}>
-              {currentUser.address}
+              {item.doctor.address}
             </Text>
           </View> : null
         }
-
-        {
-          currentUser.accountType !== 'doctor' ?
-            <View
-              style={{
-                width: '100%',
-                paddingLeft: 20,
-                flexDirection: 'row',
-                marginTop: 6,
-              }}>
-              <AntDesign name="user" size={30} color="black" />
-
-              <Text style={{ color: 'gray', paddingLeft: 5, fontSize: width * 0.05 }}>
-                {currentUser.maritalStatus}
-              </Text>
-            </View>
-            : null}
-
       </View>
     </SafeAreaView>
   );
@@ -115,7 +94,6 @@ const styles = StyleSheet.create({
   mainView: {
     flex: 8,
     alignItems: 'center',
-    justifyContent: 'center'
   },
   avatar: {
     width: 130,
@@ -141,4 +119,4 @@ const styles = StyleSheet.create({
     color: 'black',
   },
 });
-export default Profile;
+export default PatientDetail;

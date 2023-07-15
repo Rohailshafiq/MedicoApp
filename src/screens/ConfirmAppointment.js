@@ -53,7 +53,6 @@ const BookAppointmentScreen = ({ route }) => {
     }
   };
 
-
   const handleDateConfirm = (date) => {
     setSelectedDate(date);
     hideDatePicker();

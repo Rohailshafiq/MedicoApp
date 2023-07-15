@@ -20,6 +20,8 @@ const RegisterScreen = (props) => {
   const [patientMaritalStatus, setPatientMaritalStatus] = useState('');
   const [patientPassword, setPatientPassword] = useState('');
   const [patientConfirmPassword, setPatientConfirmPassword] = useState('');
+  const [patientAddress, setpatientAddress] = useState('');
+
 
   // Doctor fields
   const [doctorFullName, setDoctorFullName] = useState('');
@@ -69,6 +71,7 @@ const RegisterScreen = (props) => {
           birthDate: patientBirthDate,
           phoneNumber: patientPhoneNumber,
           email: patientEmail,
+          address: patientAddress,
           cinc: patientCinc,
           maritalStatus: patientMaritalStatus,
           accountType: accountType,
@@ -127,6 +130,9 @@ const RegisterScreen = (props) => {
 
       if (!patientEmail.trim()) {
         errors.patientEmail = 'Please enter your email';
+      }
+      if (!patientAddress.trim()) {
+        errors.patientAddress = 'Please enter your address';
       }
 
       if (!patientCinc.trim()) {
@@ -262,6 +268,14 @@ const RegisterScreen = (props) => {
             onChangeText={setPatientEmail}
           />
           {errors.patientEmail && <Text style={styles.errorText}>{errors.patientEmail}</Text>}
+
+          <TextInput
+            style={styles.input}
+            placeholder="Address"
+            value={patientAddress}
+            onChangeText={setpatientAddress}
+          />
+          {errors.patientAddress && <Text style={styles.errorText}>{errors.patientAddress}</Text>}
 
           <TextInput
             style={styles.input}

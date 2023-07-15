@@ -5,8 +5,11 @@ import { CheckBox } from 'react-native-elements';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { app } from '../config/firebase';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { useAppState } from '../Context/AppContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = (props) => {
+  const state = useAppState()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -42,12 +45,14 @@ const LoginScreen = (props) => {
         console.log('User data:', userData);
 
         setIsLoading(false);
+        await AsyncStorage.setItem('currentUser', JSON.stringify(userData));
 
-        props.navigation.navigate('Dashboard', { user: userData });
+        state.dispatch('STORE_USER', userData)
+
+        //props.navigation.navigate('Dashboard', { user: userData });
       }
     } catch (error) {
       setIsLoading(false);
-
       if (error.code === 'auth/user-not-found') {
         Alert.alert('Error', 'User not found. Please check your email and password.');
       } else {
