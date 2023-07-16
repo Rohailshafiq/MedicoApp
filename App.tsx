@@ -2,13 +2,12 @@ import React, {useEffect} from 'react';
 import {DefaultTheme, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import {StripeProvider} from '@stripe/stripe-react-native';
 import LoginScreen from './src/screens/LoginScreen';
 import RegistrationScreen from './src/screens/RegistrationScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import SplashScreen from './src/screens/SplashScreen';
 import AppointmentScreen from './src/screens/AppointmentScreen';
-// import DoctorSearch from '../src/screens/DoctorSearchScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import DoctorSearchScreen from './src/screens/DoctorSearchScreen';
 import MedicalFolder from './src/screens/MedicalFolder';
@@ -20,16 +19,16 @@ import MyDoctors from './src/screens/MyDoctors';
 import MyPatient from './src/screens/MyPatient';
 import AddPrescription from './src/screens/AddPrescription';
 import PatientDetail from './src/screens/PatientDetail';
+import Payment from './src/screens/Payment';
 
 const Stack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
-
 const MainStack = createNativeStackNavigator();
 
 const MainNavigation = () => {
   const [currentUser, setCurrentUser] = React.useState('');
   const state = useAppState();
-  console.log('state', state);
+
   const getUser = async () => {
     try {
       const user = await AsyncStorage.getItem('currentUser');
@@ -50,29 +49,23 @@ const MainNavigation = () => {
   return (
     <Stack.Navigator>
       {state?.userStateConfig?.isLoading ? (
-        <>
-          <Stack.Screen
-            name="Splash"
-            component={SplashScreen}
-            options={{headerShown: false}}
-          />
-        </>
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
+          options={{headerShown: false}}
+        />
       ) : state?.userStateConfig?.user === null ? (
-        <>
-          <Stack.Screen
-            name="Login"
-            component={PrivateRoute}
-            options={{headerShown: false}}
-          />
-        </>
+        <Stack.Screen
+          name="Login"
+          component={PrivateRoute}
+          options={{headerShown: false}}
+        />
       ) : (
-        <>
-          <Stack.Screen
-            name="Dashboard"
-            component={PublicRoute}
-            options={{headerShown: false}}
-          />
-        </>
+        <Stack.Screen
+          name="Dashboard"
+          component={PublicRoute}
+          options={{headerShown: false}}
+        />
       )}
     </Stack.Navigator>
   );
@@ -109,6 +102,7 @@ const PublicRoute = () => {
       <MainStack.Screen name="MyPatient" component={MyPatient} />
       <MainStack.Screen name="AddPrescription" component={AddPrescription} />
       <MainStack.Screen name="PatientDetail" component={PatientDetail} />
+      <MainStack.Screen name="Payment" component={Payment} />
     </MainStack.Navigator>
   );
 };
@@ -129,10 +123,13 @@ const PrivateRoute = () => {
 const App = () => {
   return (
     <NavigationContainer>
-      <AppContextProvider>
-        <MainNavigation />
-      </AppContextProvider>
+      <StripeProvider publishableKey="pk_test_51NTA88GBSrfpNSXfoNLRSBwSpYYimjjEPFTFH7V5rUqgDugweF8lvy3oidn96ebqXrwduwhva82V6e1Kn17OLazq00e2EH8qVa">
+        <AppContextProvider>
+          <MainNavigation />
+        </AppContextProvider>
+      </StripeProvider>
     </NavigationContainer>
   );
 };
+
 export default App;

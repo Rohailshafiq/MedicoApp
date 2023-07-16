@@ -100,52 +100,56 @@ const MedicalDescription = () => {
         </View>
       ) : (
         <ScrollView>
-          {prescriptions.map((item, index) => {
-            return (
-              <TouchableOpacity key={index}>
-                <View style={styles.outerContainer}>
-                  <View style={styles.innerContainer}>
-                    <Text style={styles.text}>User: </Text>
-                    <Text>{item.userName}</Text>
-                  </View>
-                  <View style={styles.innerContainer}>
-                    <Text style={styles.text}>Medicine: </Text>
-                    <Text >{item.medicine}</Text>
-                  </View>
-                  <View style={styles.innerContainer}>
-                    <Text style={styles.text}>Prescription: </Text>
+          {prescriptions.length === 0 ? (
+            <Text style={styles.noDataText}>No prescriptions found.</Text>
+          ) : (
+            prescriptions.map((item, index) => {
+              return (
+                <TouchableOpacity key={index}>
+                  <View style={styles.outerContainer}>
+                    <View style={styles.innerContainer}>
+                      <Text style={styles.text}>User: </Text>
+                      <Text>{item.userName}</Text>
+                    </View>
+                    <View style={styles.innerContainer}>
+                      <Text style={styles.text}>Medicine: </Text>
+                      <Text >{item.medicine}</Text>
+                    </View>
+                    <View style={styles.innerContainer}>
+                      <Text style={styles.text}>Prescription: </Text>
 
-                    <Text>{item.prescription}</Text>
-                  </View>
-                  <View style={styles.innerContainer}>
-                    <Text style={styles.text}>Notes: </Text>
+                      <Text>{item.prescription}</Text>
+                    </View>
+                    <View style={styles.innerContainer}>
+                      <Text style={styles.text}>Notes: </Text>
 
-                    <Text >{item.notes}</Text>
-                  </View>
-                  <View style={styles.innerContainer}>
-                    <Text style={styles.text}>Morning: </Text>
+                      <Text >{item.notes}</Text>
+                    </View>
+                    <View style={styles.innerContainer}>
+                      <Text style={styles.text}>Morning: </Text>
 
-                    <Text >{item.morning}</Text>
-                  </View>
-                  <View style={styles.innerContainer}>
-                    <Text style={styles.text}>Noon: </Text>
+                      <Text >{item.morning}</Text>
+                    </View>
+                    <View style={styles.innerContainer}>
+                      <Text style={styles.text}>Noon: </Text>
 
-                    <Text >{item.noon}</Text>
-                  </View>
-                  <View style={styles.innerContainer}>
-                    <Text style={styles.text}>Evening: </Text>
+                      <Text >{item.noon}</Text>
+                    </View>
+                    <View style={styles.innerContainer}>
+                      <Text style={styles.text}>Evening: </Text>
 
-                    <Text >{item.evening}</Text>
-                  </View>
-                  <View style={styles.innerContainer}>
-                    <Text style={styles.text}>Created At: </Text>
+                      <Text >{item.evening}</Text>
+                    </View>
+                    <View style={styles.innerContainer}>
+                      <Text style={styles.text}>Created At: </Text>
 
-                    <Text >{formatTimestamp(item.createdAt)}</Text>
+                      <Text >{formatTimestamp(item.createdAt)}</Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+                </TouchableOpacity>
+              );
+            })
+          )}
         </ScrollView>
       )}
 
@@ -175,6 +179,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  noDataText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 export default MedicalDescription;

@@ -26,7 +26,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
-const Appointments = () => {
+const Appointments = (props) => {
   const menuItem = ['on Hold', 'Accepted', 'Declined'];
   const [selectedTab, setSelectedTab] = useState("on Hold");
   const [appointments, setAppointments] = useState([]);
@@ -89,21 +89,30 @@ const Appointments = () => {
     }
   };
 
-
   const updateAppointmentStatus = async (appointmentId, newStatus) => {
     console.log('appointmentId, newStatus', appointmentId, newStatus);
     try {
+      setLoading(true); // Start the loading indicator
       const db = getFirestore(app);
       const appointmentRef = doc(db, 'appointments', appointmentId);
 
       await updateDoc(appointmentRef, {
         status: newStatus,
       });
+      Alert.alert('Success', 'Appointment status updated successfully!', [{ text: 'OK' }]);
 
-      Alert.alert('Appointment status updated successfully!');
+      // Remove the updated appointment from the appointments array
+      setAppointments(prevAppointments => prevAppointments.filter(appointment => appointment.appointmentId !== appointmentId));
     } catch (error) {
+      setLoading(false); // Stop the loading indicator
       console.log('Error updating appointment status:', error);
+    } finally {
+      setLoading(false); // Stop the loading indicator
     }
+  };
+
+  const handlePayment = () => {
+    props.navigation.navigate('Payment')
   };
 
   const renderItem = ({ item }) => {
@@ -114,11 +123,6 @@ const Appointments = () => {
       minute: '2-digit',
     });
     console.log('what is item', item.appointmentId);
-    const handlePayment = () => {
-      // Navigate to the payment screen
-      // Implement your navigation logic here
-      // Example: navigation.navigate('PaymentScreen', { appointment: item });
-    };
 
     return (
       <View style={styles.itemContainer}>
@@ -130,11 +134,12 @@ const Appointments = () => {
           <Text style={styles.itemTime}>Time: {formattedTime}</Text>
           <Text style={styles.itemPhone}>Phone: {item.phoneNumber}</Text>
           <Text style={styles.itemReason}>Reason: {item.reason}</Text>
+          <Text style={styles.itemReason}>Fee: 2000</Text>
           {item.status === 'Accepted' && user.accountType != 'doctor' && (
             <TouchableOpacity
               style={styles.paymentButton}
               onPress={handlePayment}>
-              <Text style={styles.paymentButtonText}>Payment</Text>
+              <Text style={styles.paymentButtonText}>Pay Fee</Text>
             </TouchableOpacity>
           )}
           {user.accountType == 'doctor' && item.status === 'on Hold' ? (

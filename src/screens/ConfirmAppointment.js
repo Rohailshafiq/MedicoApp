@@ -7,7 +7,7 @@ import { app } from '../config/firebase';
 import { getAuth, currentUser } from 'firebase/auth';
 
 
-const BookAppointmentScreen = ({ route }) => {
+const BookAppointmentScreen = ({ route, navigation }) => {
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [reason, setReason] = useState('');
@@ -45,7 +45,9 @@ const BookAppointmentScreen = ({ route }) => {
       const updatedAppointmentData = { ...appointmentData, appointmentId };
       await setDoc(doc(db, 'appointments', appointmentId), updatedAppointmentData);
 
-      Alert.alert('Success', 'Appointment booked successfully!', [{ text: 'OK' }]);
+      Alert.alert('Success', 'Appointment booked successfully!', [
+        { text: 'OK', onPress: () => navigation.navigate('Dashboard') }
+      ]);
     } catch (error) {
       console.log('Error storing appointment data:', error);
     } finally {
