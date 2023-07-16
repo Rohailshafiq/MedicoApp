@@ -1,47 +1,61 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  StatusBar,
+  Dimensions,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { CardField, useStripe } from '@stripe/stripe-react-native';
+import {
+  getFirestore,
+  collection,
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
+import { app } from '../config/firebase';
 
-const PaymentScreen = () => {
+const PaymentScreen = ({ route, navigation }) => {
   const { confirmPaymentMethod } = useStripe();
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const publishableKey = 'pk_test_51NTA88GBSrfpNSXfoNLRSBwSpYYimjjEPFTFH7V5rUqgDugweF8lvy3oidn96ebqXrwduwhva82V6e1Kn17OLazq00e2EH8qVa'; // Replace with your Stripe publishable key
+  const { appointmentId } = route.params;
 
-  useEffect(() => {
-    // Initialize Stripe when component mounts
-    initStripe();
-  }, []);
+  const publishableKey =
+    'pk_test_51NTA88GBSrfpNSXfoNLRSBwSpYYimjjEPFTFH7V5rUqgDugweF8lvy3oidn96ebqXrwduwhva82V6e1Kn17OLazq00e2EH8qVa'; // Replace with your Stripe publishable key
 
-  const initStripe = async () => {
-    await confirmPaymentMethod({
-      publishableKey,
-    });
-  };
+  const updateAppointmentStatus = async () => {
+    try {
+      setLoading(true); // Start the loading indicator
+      const db = getFirestore(app);
+      const appointmentRef = doc(db, 'appointments', appointmentId);
 
-  const handlePaymentMethodCreate = async () => {
-    const { error, paymentMethod } = await confirmPaymentMethod({
-      type: 'Card',
-      billingDetails: {
-        email: 'test@example.com',
-      },
-    });
+      await updateDoc(appointmentRef, {
+        paymentStatus: 'payment done',
+      });
 
-    if (error) {
-      console.log('Payment failed:', error);
-      // Handle payment failure
-    } else if (paymentMethod) {
-      console.log('Payment succeeded:', paymentMethod);
-      // Handle successful payment
+      Alert.alert('Success', 'Fee paid successfully!', [
+        { text: 'OK', onPress: () => navigation.navigate('Dashboard') },
+      ]);
+    } catch (error) {
+      console.log('Error updating appointment status:', error);
+      Alert.alert('Error', 'Failed to update payment status.', [{ text: 'OK' }]);
+    } finally {
+      setLoading(false); // Stop the loading indicator
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Payment Screen</Text>
+      <Text style={styles.title}>Payment</Text>
 
       <CardField
-        postalCodeEnabled={true}
+        postalCodeEnabled={false}
         placeholder={{
           number: '4242 4242 4242 4242',
         }}
@@ -57,9 +71,16 @@ const PaymentScreen = () => {
           // Handle field focus
         }}
       />
+      <View style={{ alignSelf: 'flex-end' }}>
+        <Text style={{ fontWeight: 'bold', fontSize: 20 }}>Total Fee: 2000</Text>
+      </View>
 
-      <TouchableOpacity style={styles.button} onPress={handlePaymentMethodCreate}>
-        <Text style={styles.buttonText}>Submit Payment</Text>
+      <TouchableOpacity style={styles.button} onPress={updateAppointmentStatus}>
+        {loading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Text style={styles.buttonText}>Pay Now</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -83,7 +104,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   button: {
-    backgroundColor: 'blue',
+    backgroundColor: 'rgb(102, 186, 170)',
     padding: 10,
     borderRadius: 5,
     marginTop: 20,

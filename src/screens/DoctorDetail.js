@@ -6,27 +6,27 @@ import { app } from '../config/firebase';
 const DoctorDetail = ({ route, navigation }) => {
   // Extract the doctor object or specialty from the route params
   const { doctor, specialty } = route.params;
-
+  console.log('docror......', doctor, specialty)
   const handleMakeAppointment = () => {
     navigation.navigate('ConfirmAppointment', { doctorId: doctor?.doctorId ? doctor?.doctorId : specialty?.doctorId })
     // Perform your appointment logic here
   };
 
   const handleCall = () => {
-    if (doctor.phone) {
-      Linking.openURL(`tel:${doctor.phone}`);
+    if (doctor?.phoneNumber ? doctor?.phoneNumber : specialty?.phoneNumber) {
+      Linking.openURL(`tel:${doctor?.phoneNumber ? doctor?.phoneNumber : specialty?.phoneNumber}`);
     }
   };
 
   const handleEmail = () => {
-    if (doctor.email) {
-      Linking.openURL(`mailto:${doctor.email}`);
+    if (doctor?.email ? doctor?.email : specialty?.email) {
+      Linking.openURL(`mailto:${doctor?.email ? doctor?.email : specialty?.email}`);
     }
   };
 
   const handleOpenMap = () => {
-    if (doctor.address) {
-      const addressEncoded = encodeURIComponent(doctor.address);
+    if (doctor?.address ? doctor?.address : specialty?.address) {
+      const addressEncoded = encodeURIComponent(doctor?.address ? doctor?.address : specialty?.address);
       Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${addressEncoded}`);
     }
   };

@@ -42,7 +42,11 @@ const SearchScreen = props => {
 
     const db = getFirestore(app);
     const appointmentsRef = collection(db, 'appointments');
-    const q = query(appointmentsRef, where('doctorId', '==', userId));
+    const q = query(
+      appointmentsRef,
+      where('status', '==', "Accepted"),
+      where('doctorId', '==', userId)
+    );
 
     try {
       const querySnapshot = await getDocs(q);

@@ -47,10 +47,6 @@ const Appointments = (props) => {
   }, []);
 
   useEffect(() => {
-    fetchAppointments(); // Fetch appointments when component mounts
-  }, []);
-
-  useEffect(() => {
     fetchAppointments(); // Fetch appointments whenever selectedTab changes
   }, [selectedTab]);
 
@@ -111,8 +107,8 @@ const Appointments = (props) => {
     }
   };
 
-  const handlePayment = () => {
-    props.navigation.navigate('Payment')
+  const handlePayment = (appointmentId) => {
+    props.navigation.navigate('Payment', { appointmentId })
   };
 
   const renderItem = ({ item }) => {
@@ -122,7 +118,6 @@ const Appointments = (props) => {
       hour: '2-digit',
       minute: '2-digit',
     });
-    console.log('what is item', item.appointmentId);
 
     return (
       <View style={styles.itemContainer}>
@@ -135,10 +130,10 @@ const Appointments = (props) => {
           <Text style={styles.itemPhone}>Phone: {item.phoneNumber}</Text>
           <Text style={styles.itemReason}>Reason: {item.reason}</Text>
           <Text style={styles.itemReason}>Fee: 2000</Text>
-          {item.status === 'Accepted' && user.accountType != 'doctor' && (
+          {item.status === 'Accepted' && user.accountType !== 'doctor' && item.paymentStatus !== 'payment done' && (
             <TouchableOpacity
               style={styles.paymentButton}
-              onPress={handlePayment}>
+              onPress={() => handlePayment(item.appointmentId)}>
               <Text style={styles.paymentButtonText}>Pay Fee</Text>
             </TouchableOpacity>
           )}
