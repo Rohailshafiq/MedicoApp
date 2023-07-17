@@ -1,25 +1,48 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, ImageBackground, Image } from 'react-native'
-import { useAppState } from '../Context/AppContext'
+import React, { useEffect, useRef } from 'react';
+import { View, Animated, StyleSheet } from 'react-native';
 
-
-const index = (props) => {
-  const { dispatch, userStateConfig } = useAppState();
+const index = () => {
+  const startValue = useRef(new Animated.Value(1)).current;
+  const endValue = 1.5;
 
   useEffect(() => {
-    if (userStateConfig.user) {
-      dispatch('LOADER_OFF');
-    }
-  }, [userStateConfig.user])
+    Animated.spring(startValue, {
+      toValue: endValue,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  }, [startValue]);
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <View style={{ borderRadius: 30, }}>
-        <Image source={require('../images/AppImage.jpeg')} style={{ width: 160, height: 160, borderRadius: 20 }} />
-      </View>
-      {/* <ImageBackground source={require('../images/AppImage.jpeg')} style={{ width: '100%', height: '100%' }} resizeMode='stretch' /> */}
+    <View style={styles.container}>
+      <Animated.Image
+        style={[
+          styles.square,
+          {
+            transform: [
+              {
+                scale: startValue,
+              },
+            ],
+          },
+        ]}
+        source={require('../images/logo.jpeg')}
+      />
     </View>
-  )
-}
+  );
+};
 
-export default index
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white'
+  },
+  square: {
+    height: 150,
+    width: 300,
+  },
+});
+
+export default index;

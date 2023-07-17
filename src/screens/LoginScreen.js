@@ -116,91 +116,86 @@ const LoginScreen = (props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.imageContainer}>
-        <Image source={require('../images/AppImage.jpeg')} style={styles.image} />
+      <Image source={require('../images/logo.jpeg')} style={styles.logo} />
+      <View style={styles.inputContainer}>
+        <AntDesign name="user" size={25} color="black" style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+        />
       </View>
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <View style={styles.inputContainer}>
-          <AntDesign name="user" size={25} color="black" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-          />
-        </View>
-        {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
+      {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
 
-        <View style={styles.inputContainer1}>
-          <AntDesign name="lock" size={25} color="black" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-        </View>
-        {passwordError ? <Text style={styles.error}>{passwordError}</Text> : null}
+      <View style={styles.inputContainer1}>
+        <AntDesign name="lock" size={25} color="black" style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+      </View>
+      {passwordError ? <Text style={styles.error}>{passwordError}</Text> : null}
 
-        <View style={styles.checkboxContainer}>
-          <CheckBox
-            title="Remember Me"
-            checked={rememberMe}
-            onPress={toggleRememberMe}
-            containerStyle={styles.checkbox}
-            textStyle={styles.checkboxText}
-            checkedColor="rgb(102,186,170)"
-            uncheckedColor="rgb(102,186,170)"
-          />
-        </View>
+      <View style={styles.checkboxContainer}>
+        <CheckBox
+          title="Remember Me"
+          checked={rememberMe}
+          onPress={toggleRememberMe}
+          containerStyle={styles.checkbox}
+          textStyle={styles.checkboxText}
+          checkedColor="rgb(102,186,170)"
+          uncheckedColor="rgb(102,186,170)"
+        />
+      </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          {isLoading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <Text style={styles.buttonText}>Login</Text>
-          )}
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        {isLoading ? (
+          <ActivityIndicator color="#fff" size="small" />
+        ) : (
+          <Text style={styles.buttonText}>Login</Text>
+        )}
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => props.navigation.navigate('Register')}
-        >
-          <Text style={styles.buttonText}>Create Account</Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => props.navigation.navigate('Register')}
+      >
+        <Text style={styles.buttonText}>Create Account</Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleForgotPassword}>
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-        </TouchableOpacity>
+      <TouchableOpacity onPress={handleForgotPassword}>
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+      </TouchableOpacity>
 
-        <Modal visible={isModalVisible} animationType="slide" transparent>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Forgot Password?</Text>
-              <TextInput
-                style={styles.modalInput}
-                placeholder="Enter your email address"
-                value={forgotPasswordEmail}
-                onChangeText={setForgotPasswordEmail}
-              />
+      <Modal visible={isModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Forgot Password?</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter your email address"
+              value={forgotPasswordEmail}
+              onChangeText={setForgotPasswordEmail}
+            />
 
-              <TouchableOpacity style={styles.modalButton} onPress={handleResetPassword}>
-                {isLoading ? (
-                  <ActivityIndicator color="white" size="small" />
-                ) : (
-                  <Text style={styles.modalButtonText}>Reset Password</Text>
-                )}
-              </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={handleResetPassword}>
+              {isLoading ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text style={styles.modalButtonText}>Reset Password</Text>
+              )}
+            </TouchableOpacity>
 
-              <TouchableOpacity style={styles.modalButton} onPress={() => setIsModalVisible(false)}>
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.modalButton} onPress={() => setIsModalVisible(false)}>
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      </View>
-
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -209,10 +204,15 @@ const LoginScreen = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //justifyContent: 'center',
-    //alignItems: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 20,
     backgroundColor: 'white',
+  },
+  logo: {
+    width: 300,
+    height: 150,
+    marginBottom: 60,
   },
   title: {
     fontSize: 24,
@@ -237,15 +237,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     paddingTop: 10,
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  image: {
-    width: 150,
-    height: 150,
-    resizeMode: 'contain',
   },
   icon: {
     marginRight: 10,
