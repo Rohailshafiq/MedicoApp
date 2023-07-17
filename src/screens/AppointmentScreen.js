@@ -23,6 +23,7 @@ import {
 import { app } from '../config/firebase';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { onValue, ref, push, set } from 'firebase/database';
 
 const { width } = Dimensions.get('window');
 
@@ -31,8 +32,8 @@ const Appointments = (props) => {
   const [selectedTab, setSelectedTab] = useState("on Hold");
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [user, setUser] = React.useState('');
+
   const getUsers = async () => {
     try {
       const cUser = await AsyncStorage.getItem('currentUser');
@@ -52,6 +53,7 @@ const Appointments = (props) => {
 
 
   const fetchAppointments = async () => {
+
     setLoading(true); // Start the loading indicator
 
     const auth = getAuth(app);
@@ -86,7 +88,6 @@ const Appointments = (props) => {
   };
 
   const updateAppointmentStatus = async (appointmentId, newStatus) => {
-    console.log('appointmentId, newStatus', appointmentId, newStatus);
     try {
       setLoading(true); // Start the loading indicator
       const db = getFirestore(app);
@@ -109,6 +110,11 @@ const Appointments = (props) => {
 
   const handlePayment = (appointmentId) => {
     props.navigation.navigate('Payment', { appointmentId })
+  };
+
+  const handleChat = (appointmentId) => {
+    // Navigate to the chat screen with the appointmentId
+    props.navigation.navigate('Chat', { appointmentId });
   };
 
   const renderItem = ({ item }) => {
@@ -137,7 +143,7 @@ const Appointments = (props) => {
               <Text style={styles.paymentButtonText}>Pay Fee</Text>
             </TouchableOpacity>
           )}
-          {user.accountType == 'doctor' && item.status === 'on Hold' ? (
+          {user.accountType === 'doctor' && item.status === 'on Hold' ? (
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 onPress={() =>
@@ -154,6 +160,13 @@ const Appointments = (props) => {
                 <Text style={styles.buttonText}>Declined</Text>
               </TouchableOpacity>
             </View>
+          ) : null}
+          {item.status === 'Accepted' && item.paymentStatus === 'payment done' ? (
+            <TouchableOpacity
+              onPress={() => handleChat(item.appointmentId)}
+              style={styles.chatButton}>
+              <Text style={styles.buttonText}>Chat</Text>
+            </TouchableOpacity>
           ) : null}
         </View>
       </View>
@@ -300,6 +313,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  chatButton: {
+    backgroundColor: 'rgb(103, 186, 170)',
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 10,
   },
   loadingContainer: {
     flex: 1,

@@ -20,6 +20,7 @@ import MyPatient from './src/screens/MyPatient';
 import AddPrescription from './src/screens/AddPrescription';
 import PatientDetail from './src/screens/PatientDetail';
 import Payment from './src/screens/Payment';
+import ChatScreen from './src/screens/ChatScreen';
 
 const Stack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
@@ -103,6 +104,7 @@ const PublicRoute = () => {
       <MainStack.Screen name="AddPrescription" component={AddPrescription} />
       <MainStack.Screen name="PatientDetail" component={PatientDetail} />
       <MainStack.Screen name="Payment" component={Payment} />
+      <MainStack.Screen name="Chat" component={ChatScreen} />
     </MainStack.Navigator>
   );
 };
