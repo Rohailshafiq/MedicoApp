@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Keyboard
 import { app } from '../config/firebase';
 import { getFirestore, collection, doc, addDoc, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import messaging from '@react-native-firebase/messaging';
 
 const ChatScreen = ({ route }) => {
   const [messages, setMessages] = useState([]);
@@ -30,7 +31,10 @@ const ChatScreen = ({ route }) => {
         console.log('Error fetching messages:', error);
       }
     );
-
+    messaging().getToken().then((token) => {
+      console.log('token', token)
+      // Save the FCM device token to the Firestore user documen
+    });
     // Cleanup the subscription when the component unmounts
     return () => unsubscribe();
   }, [db, appointmentId]);
@@ -49,13 +53,24 @@ const ChatScreen = ({ route }) => {
 
     try {
       const appointmentRef = doc(db, 'appointments', appointmentId);
-      const messagesRef = collection(appointmentRef, 'messages'); // Create a reference to the 'messages' subcollection
-      await addDoc(messagesRef, message); // Add the message document to the 'messages' subcollection
+      const messagesRef = collection(appointmentRef, 'messages');
+
+      if (messages.length === 0) {
+        const defaultMessage = {
+          senderId: 'doctor', // Set a unique identifier for the doctor
+          text: `Hi, thank you for reaching out. Our agent will contact you shortly.\n\nOur office timing are 10AM to 5PM\n(Monday to Sunday)`,
+          timestamp: new Date(),
+        };
+        await addDoc(messagesRef, defaultMessage);
+      }
+
+      await addDoc(messagesRef, message);
       setMessageText('');
     } catch (error) {
       console.log('Error sending message:', error);
     }
   };
+
 
   const renderItem = ({ item }) => {
     const isPatientMessage = item.senderId === currentUser.uid;
@@ -81,6 +96,7 @@ const ChatScreen = ({ route }) => {
       </View>
     );
   };
+
 
   return (
     // <KeyboardAvoidingView behavior="padding" style={styles.container}>
